@@ -36,7 +36,8 @@ class Comment(TimeStampedModel):
     # representation
     def __str__(self):
         return self.message
-
+        
+@python_2_unicode_compatible
 class Like(TimeStampedModel):
     
     creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
