@@ -31,7 +31,7 @@ class Comment(TimeStampedModel):
     message = models.TextField()
     creator = models.ForeignKey(user_models.User, null=True, on_delete=models.PROTECT)
 
-    image = models.ForeignKey(Image, null=True, on_delete=models.PROTECT)
+    image = models.ForeignKey(Image, null=True, on_delete=models.PROTECT, related_name='comments')
 
     # representation
     def __str__(self):
@@ -41,7 +41,7 @@ class Comment(TimeStampedModel):
 class Like(TimeStampedModel):
     
     creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
-    image = models.ForeignKey(Image, null=True, on_delete=models.PROTECT)
+    image = models.ForeignKey(Image, null=True, on_delete=models.PROTECT, related_name='likes')
 
     def __str__(self):
         return 'User: {} - Image Caption: {}'.format(self.creator.username, self.image.caption)
