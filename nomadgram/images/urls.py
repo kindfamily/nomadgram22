@@ -3,6 +3,7 @@ from . import views
 
 app_name = "images"
 urlpatterns = [
+    path("all", view=views.ListAllImages.as_view(), name="all_images"),
     path("", view=views.Feed.as_view(), name="feed"),
-    path("<int:id>/like", view=views.LikeImage.as_view(), name="like_image")
+    path("<int:id>/like/", view=views.LikeImage.as_view(), name="like_image")
 ]

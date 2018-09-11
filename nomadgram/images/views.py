@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from . import models, serializers
-from django.shortcuts import get_object_or_404
 
 
 class Feed(APIView):
@@ -10,30 +10,41 @@ class Feed(APIView):
 
         user = request.user
 
+        print(user)
+
         following_users = user.following.all()
 
-        image_list = []
+        print(following_users)
 
-        for following_user in following_users:
-
-            user_images = following_user.images.all()[:2]
-
-            for image in user_images:
-
-                image_list.append(image)
-
-        sorted_list = sorted(
-            image_list, key=lambda image: image.created_at, reverse=True)
-
-        serializer = serializers.ImageSerializer(sorted_list, many=True)
-
-        return Response(serializer.data)
+        return Response(status=200)
 
 
 class LikeImage(APIView):
 
-    def get(self, request, image_id, format=None):
+    def post(self, request, image_id, format=None):
+        
+        user = request.user
 
-        print(image_id)
+        try:
+            image = models.Image.objects.get(id=image_id)
+        except models.Image.DoesNotExist:
+            return Response(status=404)
+
+        new_like = models.Like.objects.create(
+                creator=user,
+                image=found_image
+            )
+        new_like.save()
 
         return Response(status=200)
+
+
+class ListAllImages(APIView):
+
+    def get(self, request, format=None):
+
+        all_images = models.Image.objects.all()
+
+        serializer = serializers.ImageSerializer(all_images, many=True)
+
+        return Response(data=serializer.data)        
