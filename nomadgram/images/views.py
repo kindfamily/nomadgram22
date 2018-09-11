@@ -10,34 +10,58 @@ class Feed(APIView):
 
         user = request.user
 
-        print(user)
-
         following_users = user.following.all()
 
         print(following_users)
 
-        return Response(status=200)
+        image_list = []
+
+        for following_user in following_users:
+
+            user_images = following_user.images.all()[:2]
+
+            for image in user_images:
+
+                image_list.append(image)
+
+        sorted_list = sorted(
+            image_list, key=lambda image: image.created_at, reverse=True)
+
+        serializer = serializers.ImageSerializer(sorted_list, many=True)
+
+        return Response(serializer.data)
 
 
 class LikeImage(APIView):
 
     def post(self, request, image_id, format=None):
-        
+
         user = request.user
 
         try:
-            image = models.Image.objects.get(id=image_id)
+            found_image = models.Image.objects.get(id=image_id)
         except models.Image.DoesNotExist:
-            return Response(status=404)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-        new_like = models.Like.objects.create(
+        try:
+            preexisiting_like = models.Like.objects.get(
                 creator=user,
                 image=found_image
             )
-        new_like.save()
+            preexisiting_like.delete()
 
-        return Response(status=200)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
+        except models.Like.DoesNotExist:
+
+            new_like = models.Like.objects.create(
+                creator=user,
+                image=found_image
+            )
+
+            new_like.save()
+
+            return Response(status=status.HTTP_201_CREATED)
 
 class ListAllImages(APIView):
 
