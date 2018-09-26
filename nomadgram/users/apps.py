@@ -1,13 +1,13 @@
 from django.apps import AppConfig
 
 
-class UsersAppConfig(AppConfig):
-
-    name = "nomadgram.users"
+class UsersConfig(AppConfig):
+    name = 'nomadgram.users'
     verbose_name = "Users"
 
     def ready(self):
-        try:
-            import users.signals  # noqa F401
-        except ImportError:
-            pass
+        """Override this to put in:
+            Users system checks
+            Users signal registration
+        """
+        pass

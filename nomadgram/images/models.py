@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+from taggit.managers import TaggableManager
 from nomadgram.users import models as user_models
+
 
 @python_2_unicode_compatible
 class TimeStampedModel(models.Model):
@@ -11,19 +13,25 @@ class TimeStampedModel(models.Model):
     class Meta:
         abstract = True
 
+
 @python_2_unicode_compatible
 class Image(TimeStampedModel):
-    
-    """ image Model """
+
+    """ Image Model """
     file = models.ImageField()
     location = models.CharField(max_length=140)
     caption = models.TextField()
     creator = models.ForeignKey(
         user_models.User, null=True, on_delete=models.PROTECT, related_name='images')
+    tags = TaggableManager()
 
     @property
     def like_count(self):
         return self.likes.all().count()
+
+    @property
+    def comment_count(self):
+        return self.comments.all().count()
 
     def __str__(self):
         return '{} - {}'.format(self.location, self.caption)
@@ -31,24 +39,26 @@ class Image(TimeStampedModel):
     class Meta:
         ordering = ['-created_at']
 
-    
+
 @python_2_unicode_compatible
 class Comment(TimeStampedModel):
-    
-    """ Comment Model """
-    message = models.TextField()
-    creator = models.ForeignKey(user_models.User, null=True, on_delete=models.PROTECT)
 
+    """ Comment Model """
+
+    message = models.TextField()
+    creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT, null=True)
     image = models.ForeignKey(Image, null=True, on_delete=models.PROTECT, related_name='comments')
 
-    # representation
     def __str__(self):
         return self.message
-        
+
+
 @python_2_unicode_compatible
 class Like(TimeStampedModel):
-    
-    creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
+
+    """ Like Model """
+
+    creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT, null=True)
     image = models.ForeignKey(Image, null=True, on_delete=models.PROTECT, related_name='likes')
 
     def __str__(self):
